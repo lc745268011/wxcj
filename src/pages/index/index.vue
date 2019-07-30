@@ -1,5 +1,7 @@
 <template>
   <div>
+
+    <button open-type="getUserInfo" @getuserinfo="bindGetUserInfo" v-if="userstatus">123</button>
     <div class="i-title clearfix p30">
       <span class="fl">福利</span>
       <span class="fr i-gohome"><navigator url="../counter/main" hover-class="navigator-hover">我要上首页</navigator></span>
@@ -53,19 +55,71 @@ export default {
           ],
           endtime: '2019-07-08 15:00'
         }
-      ]
+      ],
+      userstatus: false
     }
   },
 
   components: {
   },
-
+  onShow: function () {
+    var that = this
+    wx.getSetting({
+      success (res) {
+        if (!res.authSetting['scope.userInfo']) {
+          that.userstatus = true
+        } else {
+          that.userstatus = false
+        }
+      },
+      fail () {
+        that.userstatus = false
+      }
+    })
+  },
   methods: {
     // jump () {
     //   wx.switchTab({
     //     url: '../mine/main'
     //   })
     // }
+    bindGetUserInfo (e) {
+      var that = this
+      wx.checkSession({
+        success () {
+          // session_key 未过期，并且在本生命周期一直有效
+        },
+        fail () {
+          // session_key 已经失效，需要重新执行登录流程
+          wx.login({
+            success (res) {
+              if (res.code) {
+                // 发起网络请求
+                wx.request({
+                  url: that.baseApi + '/portal/Index/getuserinfo',
+                  method: 'POST',
+                  header: {'content-type': 'application/x-www-form-urlencoded'},
+                  data: {
+                    code: res.code,
+                    userinfo: JSON.stringify(e.mp.detail.userInfo)
+                  },
+                  success (res) {
+                    if (res.data.code > 0) {
+                      wx.setStorage({
+                        key: 'userInfo',
+                        data: res.data.data[0]
+                      })
+                    }
+                  }
+                })
+              } else {
+                console.log('登录失败！' + res.errMsg)
+              }
+            }
+          })
+        }
+      })
+    }
   },
 
   created () {
