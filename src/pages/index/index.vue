@@ -5,7 +5,6 @@
     <div class="i-title clearfix p30">
       <span class="fl">福利</span>
       <span class="fr i-gohome"><navigator url="../counter/main" hover-class="navigator-hover">我要上首页</navigator></span>
-      <!-- <span class="fr" @click="jump">跳转</span> -->
     </div>
     <ul class="welfare">
       <li v-for="(item,index) in welfare" :key="index">
@@ -78,11 +77,6 @@ export default {
     })
   },
   methods: {
-    // jump () {
-    //   wx.switchTab({
-    //     url: '../mine/main'
-    //   })
-    // }
     bindGetUserInfo (e) {
       var that = this
       wx.checkSession({
@@ -109,6 +103,7 @@ export default {
                         key: 'userInfo',
                         data: res.data.data[0]
                       })
+                      that.userstatus = false
                     }
                   }
                 })
@@ -129,7 +124,7 @@ export default {
 
 <style scoped lang="scss">
 .i-title{
-  padding: 10px 15px;
+  padding: 10px 15px 0 15px;
   .fl{
     font-size: 20px;
     color: #ff0000;
@@ -146,6 +141,7 @@ export default {
   li{
     background: #fff;
     border:1px solid #dcdcdc;
+    margin-bottom: 10px;
     .welfare-pic{
       height: 150px;
       width: 100%;
@@ -155,7 +151,7 @@ export default {
       background-repeat: no-repeat;
     }
     .welfare-info{
-
+      padding: 5px 10px;
     }
   }
 }
