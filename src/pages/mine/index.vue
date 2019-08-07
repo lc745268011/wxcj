@@ -32,9 +32,11 @@
     <ul class="tjlist">
       <li>关于我们</li>
     </ul>
+    <card1 :selectNavIndex="2"></card1>
   </div>
 </template>
 <script>
+import card1 from '@/components/card1'
 export default {
   data () {
     return {
@@ -50,6 +52,9 @@ export default {
         console.log(8888, res.data)
       }
     })
+  },
+  components: {
+    card1
   }
 }
 </script>

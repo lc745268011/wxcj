@@ -1,9 +1,9 @@
 <template>
   <div class="form">
-    <div v-for="(item,index) in formUpload" class="formlist">
+    <div v-for="(item,index) in formUpload" class="formlist" :key="index">
       <div class="upload">
-        <image class="uploadImg" mode="aspectFill center" :src="item.uploadImg"></image>
-        <button @click="upload" class="uploadBtn">更换图片</button>
+        <image class="uploadImg" :src="item.uploadImg" mode='aspectFill'></image>
+        <button @click="upload(index)" class="uploadBtn">更换图片</button>
       </div>
       <div class="vCenter inputPanel">
         <icon type="cancel" v-show="index+1>1" :class="{'del':index+1>1}" @click="delUpload(index)"/>
@@ -41,6 +41,7 @@
         </i-cell>
       </i-cell-group>
     </i-panel>
+    <button @click="submit"> 提交 </button>
   </div>
 </template>
 
@@ -147,6 +148,49 @@ export default {
       const hour = this.newMultiArray[3][index[3]]
       const minute = this.newMultiArray[4][index[4]]
       this.time = year + '-' + month + '-' + day + ' ' + hour + ':' + minute
+    },
+    upload (i) {
+      var that = this
+      wx.chooseImage({
+        count: 1,
+        sizeType: ['original', 'compressed'],
+        sourceType: ['album', 'camera'],
+        success (res) {
+          // tempFilePath可以作为img标签的src属性显示图片
+          const tempFilePaths = res.tempFilePaths
+          wx.uploadFile({
+            url: that.baseApi + '/portal/Index/upload',
+            filePath: tempFilePaths[0],
+            name: 'file',
+            success (res) {
+              var data = JSON.parse(res.data)
+              console.log(7878, data)
+
+              if (data.code === 1) {
+                that.formUpload[i].uploadImg = that.baseApi + '/' + data.data.sname
+              }
+            }
+          })
+        }
+      })
+    },
+    submit () {
+      var that = this
+      wx.request({
+        url: that.baseApi + '/portal/Index/receive',
+        method: 'POST',
+        header: {'content-type': 'application/x-www-form-urlencoded'},
+        data: {
+          formUpload: JSON.stringify(that.formUpload),
+          lotteryType: that.index,
+          lotteryTime: that.time,
+          lotteryNumber: that.num
+        },
+        success (res) {
+          if (res.data.code > 0) {
+          }
+        }
+      })
     }
   }
 }
@@ -163,6 +207,7 @@ export default {
 .upload{
   width: 100%;
   position: relative;
+  height: 150px;
   .uploadImg{
     width: 375px;
     height: 150px;

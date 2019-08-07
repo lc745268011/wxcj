@@ -19,11 +19,12 @@
         </div>
       </li>
     </ul>
+    <card1 :selectNavIndex="0"></card1>
   </div>
 </template>
 
 <script>
-
+import card1 from '@/components/card1'
 export default {
   data () {
     return {
@@ -60,6 +61,7 @@ export default {
   },
 
   components: {
+    card1
   },
   onShow: function () {
     var that = this
@@ -101,7 +103,7 @@ export default {
                     if (res.data.code > 0) {
                       wx.setStorage({
                         key: 'userInfo',
-                        data: res.data.data[0]
+                        data: res.data.data
                       })
                       that.userstatus = false
                     }

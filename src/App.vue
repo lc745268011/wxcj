@@ -1,5 +1,8 @@
 <script>
 export default {
+  onLaunch () {
+    wx.hideTabBar()
+  },
   created () {
     // 调用API从本地缓存中获取数据
     /*

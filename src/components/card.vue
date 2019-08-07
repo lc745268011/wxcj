@@ -1,14 +1,14 @@
 <template>
   <div>
     <p class="card">
-      {{text}}
+      121212
     </p>
   </div>
 </template>
 
 <script>
 export default {
-  props: ['text']
+  // props: ['text']
 }
 </script>
 
