@@ -1,51 +1,90 @@
 <template>
   <div class="form">
-    <div v-for="(item,index) in formUpload" class="formlist" :key="index">
+    <div v-for="(item,index) in formUpload"
+         class="formlist"
+         :key="index">
       <div class="upload">
-        <image class="uploadImg" :src="item.uploadImg" mode='aspectFill'></image>
-        <button @click="upload(index)" class="uploadBtn">更换图片</button>
+        <image class="uploadImg"
+               :src="url+item.uploadImg"
+               mode='aspectFill'></image>
+        <button @click="upload(index)"
+                class="uploadBtn">更换图片</button>
       </div>
       <div class="vCenter inputPanel">
-        <icon type="cancel" v-show="index+1>1" :class="{'del':index+1>1}" @click="delUpload(index)"/>
+        <icon type="cancel"
+              v-show="index+1>1"
+              :class="{'del':index+1>1}"
+              @click="delUpload(index)" />
         <div>
           <i-cell-group>
             <i-cell :title="formUpload.length>1?index+1+'等奖名称':'奖品名称'">
-              <input slot="footer" i-class="uploadInput" :value="item.name" right placeholder="请输入奖品名称" />
+              <input slot="footer"
+                     i-class="uploadInput"
+                     v-model="item.name"
+                     right
+                     placeholder="请输入奖品名称" />
             </i-cell>
-            <i-cell title="请输入奖品名称">
-              <input slot="footer" i-class="uploadInput" :value="item.num" maxlength="10000" type="number" right placeholder="份数" />
+            <i-cell title="请输入奖品数量">
+              <input slot="footer"
+                     i-class="uploadInput"
+                     v-model="item.num"
+                     maxlength="10000"
+                     type="number"
+                     right
+                     placeholder="份数" />
             </i-cell>
           </i-cell-group>
         </div>
       </div>
     </div>
     <div class="center">
-      <button size="mini" class="newUpload" @click="newUpload()">+ 添加新奖项</button>
+      <button size="mini"
+              class="newUpload"
+              @click="newUpload()">+ 添加新奖项</button>
     </div>
     <i-panel title="开奖设置">
       <i-cell-group>
-        <i-cell title="设置开奖条件" is-link>
-          <picker slot="footer" @change="bindPickerChange" :value="index" :range="array">
+        <i-cell title="设置开奖条件"
+                is-link>
+          <picker slot="footer"
+                  @change="bindPickerChange"
+                  :value="index"
+                  :range="array">
             <view class="picker">
               {{array[index]}}
             </view>
           </picker>
         </i-cell>
-        <i-cell v-if="index==0" title="设置开奖时间" is-link>
-          <picker slot="footer" mode="multiSelector" @change="bindMultiPickerChange" :value="multiIndex" :range="newMultiArray">
+        <i-cell v-if="index==0"
+                title="设置开奖时间"
+                is-link>
+          <picker slot="footer"
+                  mode="multiSelector"
+                  @change="bindMultiPickerChange"
+                  :value="multiIndex"
+                  :range="newMultiArray">
             <span>{{time}}</span>
           </picker>
         </i-cell>
-        <i-cell v-if="index==1" title="设置开奖人数">
-          <input slot="footer" type="number" :value="num" right placeholder="人数" maxlength="10000"/>
+        <i-cell v-if="index==1"
+                title="设置开奖人数">
+          <input slot="footer"
+                 type="number"
+                 v-model="num"
+                 right
+                 placeholder="人数"
+                 maxlength="10000" />
         </i-cell>
       </i-cell-group>
     </i-panel>
-    <button @click="submit"> 提交 </button>
+    <button @click="submit"
+            class="submitBtn"> 提 交 </button>
+    <i-toast id="toast" />
   </div>
 </template>
 
 <script>
+const { $Toast } = require('../../../static/iview/base/index')
 export default {
   data () {
     return {
@@ -59,7 +98,9 @@ export default {
       time: '',
       multiArray: [],
       multiIndex: [0, 0, 0, 0, 0],
-      num: ''
+      num: '',
+      url: '',
+      userid: 0
     }
   },
   computed: {
@@ -107,6 +148,15 @@ export default {
     }
   },
   mounted () {
+    var that = this
+    that.url = this.baseApi
+    wx.getStorage({
+      key: 'userInfo',
+      success (res) {
+        console.log(res.data.id)
+        that.userid = res.data.id
+      }
+    })
     var date = new Date()
     var Y = date.getFullYear()
     var M = date.getMonth()
@@ -164,10 +214,8 @@ export default {
             name: 'file',
             success (res) {
               var data = JSON.parse(res.data)
-              console.log(7878, data)
-
               if (data.code === 1) {
-                that.formUpload[i].uploadImg = that.baseApi + '/' + data.data.sname
+                that.formUpload[i].uploadImg = '/' + data.data.sname
               }
             }
           })
@@ -179,15 +227,26 @@ export default {
       wx.request({
         url: that.baseApi + '/portal/Index/receive',
         method: 'POST',
-        header: {'content-type': 'application/x-www-form-urlencoded'},
+        header: { 'content-type': 'application/x-www-form-urlencoded' },
         data: {
           formUpload: JSON.stringify(that.formUpload),
           lotteryType: that.index,
           lotteryTime: that.time,
-          lotteryNumber: that.num
+          lotteryNumber: that.num,
+          userid: that.userid
         },
         success (res) {
+          console.log(res.data)
           if (res.data.code > 0) {
+            $Toast({
+              content: '添加成功',
+              type: 'success'
+            })
+          } else {
+            $Toast({
+              content: '添加失败',
+              type: 'error'
+            })
           }
         }
       })
@@ -197,22 +256,22 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.center{
+.center {
   text-align: center;
   margin: 15px;
 }
-.formlist{
-  margin-bottom:15px; 
+.formlist {
+  margin-bottom: 15px;
 }
-.upload{
+.upload {
   width: 100%;
   position: relative;
   height: 150px;
-  .uploadImg{
+  .uploadImg {
     width: 375px;
     height: 150px;
   }
-  .uploadBtn{
+  .uploadBtn {
     position: absolute;
     top: 10px;
     right: 10px;
@@ -222,33 +281,42 @@ export default {
     font-size: 12px;
     border-radius: 10px;
   }
-  .uploadBtn::after {
-    border: none
+  button::after {
+    border: none;
   }
 }
-.newUpload{
+.newUpload {
   border: 1px solid #999999;
   color: #999;
   width: auto;
-  border-radius: 0
+  border-radius: 0;
 }
 .newUpload::after {
   border: none;
 }
-.inputPanel{
-  background:#fff;
-  >div{
-    flex:1;
+.inputPanel {
+  background: #fff;
+  > div {
+    flex: 1;
   }
-  .del{
-    margin:0 0 0 15px;
+  .del {
+    margin: 0 0 0 15px;
   }
 }
 </style>
 <style>
-.form .uploadInput{
+.form .uploadInput {
   border-bottom: 1px solid #e9e9e9;
   position: static;
+}
+.submitBtn {
+  width: 345px;
+  background: #f56c6c;
+  color: #fff;
+  height: 40px;
+  line-height: 40px;
+  border: 0;
+  margin: 20px auto;
 }
 </style>
 
