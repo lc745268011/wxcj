@@ -3,7 +3,8 @@
     "pages/index/main",
     "pages/counter/main",
     "pages/logs/main",
-    "pages/mine/main"
+    "pages/mine/main",
+    "pages/cjDetail/main"
   ],
   "window": {
     "backgroundTextStyle": "light",

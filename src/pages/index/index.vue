@@ -7,15 +7,22 @@
       <span class="fr i-gohome"><navigator url="../counter/main" hover-class="navigator-hover">我要上首页</navigator></span>
     </div>
     <ul class="welfare">
-      <li v-for="(item,index) in welfare" :key="index">
-        <div class="welfare-pic" :style="{'backgroundImage':'url('+item.pic+')'}"></div>
-        <div class="welfare-info">
-          <div class="">{{item.sponsor}} 赞助</div>
-          <div v-for="(m,i) in item.prize" :key="i">
-            <div class="" v-if="item.prize.length==1">奖品：{{m.name}} X{{m.num}}</div>
-            <div class="" v-if="item.prize.length>1">奖品{{i+1}}：{{m.name}} X{{m.num}}</div>
+      <li v-for="(item,index) in welfare" :key="index" @click="goRoute(item.id)">
+        <swiper :indicator-dots="true" indicator-color='#d8d8d8' indicator-active-color = '#ffad36' :interval="3000" :duration="500">
+          <div v-for="(n,i) in item.list">
+            <swiper-item>
+              <image :src="n.pfile" class="slide-image welfare-pic"/>
+            </swiper-item>
           </div>
-          <div class="">{{item.endtime}} 自动开奖</div>
+        </swiper>
+        <div class="welfare-info">
+          <div class="" v-if="item.userinfo">{{item.userinfo.nickName}} 赞助</div>
+          <div v-for="(m,i) in item.list" :key="i">
+            <div class="" v-if="item.list.length==1">奖品：{{m.pname}} X{{m.pnum}}</div>
+            <div class="" v-if="item.list.length>1">奖品{{i+1}}：{{m.pname}} X{{m.pnum}}</div>
+          </div>
+          <div class="" v-if="item.lotteryType==0">{{item.lotteryTime}} 自动开奖</div>
+          <div class="" v-if="item.lotteryType==1">{{item.lotteryNumber}} 自动开奖</div>
         </div>
       </li>
     </ul>
@@ -28,34 +35,7 @@ import card1 from '@/components/card1'
 export default {
   data () {
     return {
-      welfare: [
-        {
-          pic: require('../../../static/images/pic.jpg'),
-          sponsor: '京东',
-          prize: [
-            {
-              name: '小米9',
-              num: 1
-            }
-          ],
-          endtime: '2019-07-08 15:00'
-        },
-        {
-          pic: require('../../../static/images/pic.jpg'),
-          sponsor: '京东',
-          prize: [
-            {
-              name: '小米9',
-              num: 1
-            },
-            {
-              name: '小米8',
-              num: 2
-            }
-          ],
-          endtime: '2019-07-08 15:00'
-        }
-      ],
+      welfare: [],
       userstatus: false
     }
   },
@@ -71,14 +51,45 @@ export default {
           that.userstatus = true
         } else {
           that.userstatus = false
+          wx.getUserInfo({
+            success: function (res) {
+              console.log(res.userInfo)
+            }
+          })
         }
       },
       fail () {
         that.userstatus = false
       }
     })
+    that.getlist()
+  },
+  mounted () {
+    this.getlist()
   },
   methods: {
+    getlist () {
+      var that = this
+      wx.request({
+        url: that.baseApi + '/portal/Index/plist',
+        method: 'POST',
+        header: {'content-type': 'application/x-www-form-urlencoded'},
+        data: {
+        },
+        success (res) {
+          if (res.data.code > 0) {
+            console.log(99999, res.data.data)
+            that.welfare = res.data.data
+          }
+        }
+      })
+    },
+    goRoute (id) {
+      console.log('/pages/cjDetail/main?id=' + id)
+      wx.navigateTo({
+        url: '/pages/cjDetail/main?id=' + id
+      })
+    },
     bindGetUserInfo (e) {
       var that = this
       wx.checkSession({

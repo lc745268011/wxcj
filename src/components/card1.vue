@@ -1,4 +1,6 @@
 <template>
+<div>
+  <div class="box"></div>
   <div class="tabbar-wrap" :class="isIphoneX? 'isIphoneX':''">
       <ul class="tabbar">
           <li class="tabbar-item" v-for="(item, index) in navList" 
@@ -17,6 +19,7 @@
           </li>
       </ul>
   </div>
+</div>
 </template>
 
 <script>
@@ -84,6 +87,9 @@
 </script>
 
 <style lang="stylus" scoped>
+.box{
+  height 46px
+}
 .tabbar-wrap 
     position fixed
     bottom 0
@@ -91,6 +97,7 @@
     height 46px
     width 100%
     padding-top 3px
+    background #fff
     box-shadow 0 0 1px #C4C4C4
     &.isIphoneX
         padding-bottom 33px
